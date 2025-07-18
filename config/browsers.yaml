@@ -1,0 +1,39 @@
+browsers:
+  chrome:
+    enabled: true
+    headless: false
+    options:
+      - "--window-size=1920,1080"
+      - "--disable-gpu"
+      - "--no-sandbox"
+      - "--disable-dev-shm-usage"
+
+  firefox:
+    enabled: true
+    headless: false
+    options:
+      - "--width=1920"
+      - "--height=1080"
+
+  edge:
+    enabled: true
+    headless: false
+    options:
+      - "--window-size=1920,1080"
+
+  safari:
+    enabled: false  # Only on macOS
+
+test_settings:
+  timeout: 30
+  implicit_wait: 10
+  poll_frequency: 0.5
+
+parallel:
+  enabled: true
+  max_workers: 4
+
+reporting:
+  screenshots_on_failure: true
+  generate_matrix: true
+  html_report: true

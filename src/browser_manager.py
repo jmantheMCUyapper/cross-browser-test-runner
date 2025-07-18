@@ -1,0 +1,144 @@
+"""
+Browser Manager - Handles browser driver initialization and configuration
+"""
+import logging
+from typing import Dict, Any, Optional
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from selenium.webdriver.edge.service import Service as EdgeService
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.microsoft import EdgeChromiumDriverManager
+import yaml
+import os
+
+logger = logging.getLogger(__name__)
+
+
+class BrowserManager:
+    """Manages browser driver creation and configuration"""
+
+    def __init__(self, config_path: str = "config/browsers.yaml"):
+        """Initialize browser manager with configuration"""
+        self.config = self._load_config(config_path)
+        self.supported_browsers = {
+            'chrome': self._create_chrome,
+            'firefox': self._create_firefox,
+            'edge': self._create_edge,
+            'safari': self._create_safari
+        }
+
+    def _load_config(self, config_path: str) -> Dict[str, Any]:
+        """Load browser configuration from YAML file"""
+        try:
+            with open(config_path, 'r') as file:
+                return yaml.safe_load(file)
+        except FileNotFoundError:
+            logger.warning(f"Config file {config_path} not found. Using defaults.")
+            return self._get_default_config()
+
+    def _get_default_config(self) -> Dict[str, Any]:
+        """Return default configuration"""
+        return {
+            'browsers': {
+                'chrome': {'enabled': True, 'headless': False, 'options': []},
+                'firefox': {'enabled': True, 'headless': False, 'options': []},
+                'edge': {'enabled': True, 'headless': False, 'options': []},
+                'safari': {'enabled': False, 'headless': False, 'options': []}
+            }
+        }
+
+    def get_browser(self, browser_name: str) -> webdriver.Remote:
+        """Create and return a configured browser instance"""
+        browser_name = browser_name.lower()
+
+        if browser_name not in self.supported_browsers:
+            raise ValueError(f"Browser '{browser_name}' is not supported. "
+                             f"Supported browsers: {list(self.supported_browsers.keys())}")
+
+        browser_config = self.config['browsers'].get(browser_name, {})
+        if not browser_config.get('enabled', False):
+            raise ValueError(f"Browser '{browser_name}' is disabled in configuration")
+
+        logger.info(f"Creating {browser_name} browser instance...")
+        return self.supported_browsers[browser_name](browser_config)
+
+    def _create_chrome(self, config: Dict[str, Any]) -> webdriver.Chrome:
+        """Create Chrome browser instance"""
+        options = webdriver.ChromeOptions()
+
+        # Add custom options from config
+        for option in config.get('options', []):
+            options.add_argument(option)
+
+        # Set headless if configured
+        if config.get('headless', False):
+            options.add_argument('--headless')
+
+        # Additional Chrome-specific options
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_experimental_option('useAutomationExtension', False)
+
+        service = ChromeService(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+
+        self._configure_timeouts(driver)
+        return driver
+
+    def _create_firefox(self, config: Dict[str, Any]) -> webdriver.Firefox:
+        """Create Firefox browser instance"""
+        options = webdriver.FirefoxOptions()
+
+        # Add custom options from config
+        for option in config.get('options', []):
+            options.add_argument(option)
+
+        # Set headless if configured
+        if config.get('headless', False):
+            options.add_argument('--headless')
+
+        service = FirefoxService(GeckoDriverManager().install())
+        driver = webdriver.Firefox(service=service, options=options)
+
+        self._configure_timeouts(driver)
+        return driver
+
+    def _create_edge(self, config: Dict[str, Any]) -> webdriver.Edge:
+        """Create Edge browser instance"""
+        options = webdriver.EdgeOptions()
+
+        # Add custom options from config
+        for option in config.get('options', []):
+            options.add_argument(option)
+
+        # Set headless if configured
+        if config.get('headless', False):
+            options.add_argument('--headless')
+
+        service = EdgeService(EdgeChromiumDriverManager().install())
+        driver = webdriver.Edge(service=service, options=options)
+
+        self._configure_timeouts(driver)
+        return driver
+
+    def _create_safari(self, config: Dict[str, Any]) -> webdriver.Safari:
+        """Create Safari browser instance (macOS only)"""
+        # Safari doesn't support many options like other browsers
+        driver = webdriver.Safari()
+        self._configure_timeouts(driver)
+        return driver
+
+    def _configure_timeouts(self, driver: webdriver.Remote) -> None:
+        """Configure driver timeouts from settings"""
+        settings = self.config.get('test_settings', {})
+        implicit_wait = settings.get('implicit_wait', 10)
+        driver.implicitly_wait(implicit_wait)
+
+    def get_enabled_browsers(self) -> list:
+        """Return list of enabled browser names"""
+        enabled = []
+        for browser, config in self.config['browsers'].items():
+            if config.get('enabled', False):
+                enabled.append(browser)
+        return enabled
