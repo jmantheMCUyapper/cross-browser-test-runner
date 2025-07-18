@@ -28,3 +28,6 @@ Thumbs.db
 drivers/
 test_results/
 .pytest_cache/
+
+# Web Drivers
+.wdm/
