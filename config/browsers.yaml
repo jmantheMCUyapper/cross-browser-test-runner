@@ -16,7 +16,7 @@ browsers:
       - "--height=1080"
 
   edge:
-    enabled: true
+    enabled: false  # Disable Edge temporarily
     headless: false
     options:
       - "--window-size=1920,1080"

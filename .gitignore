@@ -6,28 +6,34 @@ __pycache__/
 .Python
 env/
 venv/
-.env
+ENV/
+.venv
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+results/
+logs/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# Test outputs
-reports/*.html
-reports/*.png
-reports/*.json
-*.log
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Project specific
-drivers/
-test_results/
-.pytest_cache/
+# WebDriver
+chromedriver
+geckodriver
+msedgedriver
+*.exe
 
-# Web Drivers
-.wdm/
+# Temporary files
+*.tmp
+temp_*

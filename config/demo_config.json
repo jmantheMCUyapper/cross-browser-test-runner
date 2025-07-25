@@ -1,0 +1,15 @@
+{
+  "browsers": ["chrome", "firefox", "edge"],
+  "test_files": [
+    "tests/demo_suite.py"
+  ],
+  "parallel_execution": false,
+  "retry_failed_tests": false,
+  "screenshot_on_failure": true,
+  "timeout": 30,
+  "headless": false,
+  "window_size": {
+    "width": 1920,
+    "height": 1080
+  }
+}

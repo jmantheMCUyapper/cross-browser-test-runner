@@ -7,27 +7,41 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.edge.service import Service as EdgeService
+from selenium.common.exceptions import SessionNotCreatedException, WebDriverException
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 from webdriver_manager.microsoft import EdgeChromiumDriverManager
 import yaml
 import os
+import platform
 
 logger = logging.getLogger(__name__)
+
+
+class BrowserNotFoundError(Exception):
+    """Raised when a browser is not installed on the system"""
+    pass
 
 
 class BrowserManager:
     """Manages browser driver creation and configuration"""
 
-    def __init__(self, config_path: str = "config/browsers.yaml"):
+    def __init__(self, config_path: str = None):
         """Initialize browser manager with configuration"""
-        self.config = self._load_config(config_path)
+        if config_path is None:
+            # Find config file relative to project root
+            from pathlib import Path
+            project_root = Path(__file__).parent.parent
+            config_path = project_root / "config" / "browsers.yaml"
+
+        self.config = self._load_config(str(config_path))
         self.supported_browsers = {
             'chrome': self._create_chrome,
             'firefox': self._create_firefox,
             'edge': self._create_edge,
             'safari': self._create_safari
         }
+        self.available_browsers = self._detect_available_browsers()
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load browser configuration from YAML file"""
@@ -49,6 +63,52 @@ class BrowserManager:
             }
         }
 
+    def _detect_available_browsers(self) -> Dict[str, bool]:
+        """Detect which browsers are installed on the system"""
+        available = {}
+
+        # Check Chrome
+        chrome_paths = {
+            'Windows': [
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe")
+            ],
+            'Darwin': ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"],
+            'Linux': ["/usr/bin/google-chrome", "/usr/bin/chromium-browser"]
+        }
+
+        # Check Firefox
+        firefox_paths = {
+            'Windows': [
+                r"C:\Program Files\Mozilla Firefox\firefox.exe",
+                r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+            ],
+            'Darwin': ["/Applications/Firefox.app/Contents/MacOS/firefox"],
+            'Linux': ["/usr/bin/firefox"]
+        }
+
+        # Check Edge
+        edge_paths = {
+            'Windows': [
+                r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"
+            ],
+            'Darwin': ["/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"],
+            'Linux': ["/usr/bin/microsoft-edge"]
+        }
+
+        system = platform.system()
+
+        # Check each browser
+        available['chrome'] = any(os.path.exists(path) for path in chrome_paths.get(system, []))
+        available['firefox'] = any(os.path.exists(path) for path in firefox_paths.get(system, []))
+        available['edge'] = any(os.path.exists(path) for path in edge_paths.get(system, []))
+        available['safari'] = system == 'Darwin'  # Safari only on macOS
+
+        logger.info(f"Detected browsers: {available}")
+        return available
+
     def get_browser(self, browser_name: str) -> webdriver.Remote:
         """Create and return a configured browser instance"""
         browser_name = browser_name.lower()
@@ -61,8 +121,31 @@ class BrowserManager:
         if not browser_config.get('enabled', False):
             raise ValueError(f"Browser '{browser_name}' is disabled in configuration")
 
+        # Check if browser is installed
+        if not self.available_browsers.get(browser_name, False):
+            raise BrowserNotFoundError(
+                f"{browser_name.title()} browser is not installed on this system. "
+                f"Please install {browser_name.title()} or disable it in the configuration."
+            )
+
         logger.info(f"Creating {browser_name} browser instance...")
-        return self.supported_browsers[browser_name](browser_config)
+
+        try:
+            return self.supported_browsers[browser_name](browser_config)
+        except SessionNotCreatedException as e:
+            if "binary location" in str(e) or "Unable to find" in str(e):
+                raise BrowserNotFoundError(
+                    f"{browser_name.title()} browser not found at expected location. "
+                    f"Please ensure {browser_name.title()} is properly installed."
+                )
+            else:
+                raise
+        except WebDriverException as e:
+            logger.error(f"WebDriver error for {browser_name}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error creating {browser_name} browser: {e}")
+            raise
 
     def _create_chrome(self, config: Dict[str, Any]) -> webdriver.Chrome:
         """Create Chrome browser instance"""
@@ -74,7 +157,13 @@ class BrowserManager:
 
         # Set headless if configured
         if config.get('headless', False):
-            options.add_argument('--headless')
+            options.add_argument('--headless=new')
+
+        # Windows-specific options
+        if platform.system() == 'Windows':
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-gpu')
+            options.add_argument('--disable-dev-shm-usage')
 
         # Additional Chrome-specific options
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
@@ -97,6 +186,17 @@ class BrowserManager:
         # Set headless if configured
         if config.get('headless', False):
             options.add_argument('--headless')
+
+        # Set Firefox binary location if needed
+        if platform.system() == 'Windows':
+            firefox_paths = [
+                r"C:\Program Files\Mozilla Firefox\firefox.exe",
+                r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+            ]
+            for path in firefox_paths:
+                if os.path.exists(path):
+                    options.binary_location = path
+                    break
 
         service = FirefoxService(GeckoDriverManager().install())
         driver = webdriver.Firefox(service=service, options=options)
@@ -124,6 +224,9 @@ class BrowserManager:
 
     def _create_safari(self, config: Dict[str, Any]) -> webdriver.Safari:
         """Create Safari browser instance (macOS only)"""
+        if platform.system() != 'Darwin':
+            raise BrowserNotFoundError("Safari is only available on macOS")
+
         # Safari doesn't support many options like other browsers
         driver = webdriver.Safari()
         self._configure_timeouts(driver)
@@ -142,3 +245,16 @@ class BrowserManager:
             if config.get('enabled', False):
                 enabled.append(browser)
         return enabled
+
+    def get_available_enabled_browsers(self) -> list:
+        """Return list of browsers that are both enabled and installed"""
+        enabled = self.get_enabled_browsers()
+        available = []
+
+        for browser in enabled:
+            if self.available_browsers.get(browser, False):
+                available.append(browser)
+            else:
+                logger.warning(f"{browser.title()} is enabled but not installed")
+
+        return available
