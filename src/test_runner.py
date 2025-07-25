@@ -7,6 +7,7 @@ from typing import List, Dict, Any
 
 # Add this import
 from src.report_generator import ReportGenerator
+from security import safe_command
 
 
 class TestRunner:
@@ -119,7 +120,7 @@ class TestRunner:
         results = []
         try:
             # Run the tests
-            process = subprocess.run(cmd, capture_output=True, text=True)
+            process = safe_command.run(subprocess.run, cmd, capture_output=True, text=True)
             print(f"\nTest output for {browser} - {test_file}:")
             print(process.stdout[-500:] if len(process.stdout) > 500 else process.stdout)  # Last 500 chars
             if process.stderr:
