@@ -1,0 +1,141 @@
+{
+  "timestamp": "2025-07-18T01:26:14.390701",
+  "results": [
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_cross_browser.py::TestCrossBrowserCompatibility::test_basic_navigation",
+      "status": "passed",
+      "duration": 46.572350100032054,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_cross_browser.py::TestCrossBrowserCompatibility::test_window_resize",
+      "status": "failed",
+      "duration": 46.85438230005093,
+      "error_message": "tests\\sample_tests\\test_cross_browser.py:38: in test_window_resize\n    assert abs(current_size['height'] - height) < 150\nE   assert 313 < 150\nE    +  where 313 = abs((767 - 1080))",
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_cross_browser.py::TestCrossBrowserCompatibility::test_javascript_execution",
+      "status": "passed",
+      "duration": 46.424497700005304,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_cross_browser.py::TestCrossBrowserCompatibility::test_form_inputs",
+      "status": "passed",
+      "duration": 5.6269284000154585,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_cross_browser.py::TestCrossBrowserCompatibility::test_cookies",
+      "status": "passed",
+      "duration": 4.7902166999992914,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_local_demo.py::TestLocalDemo::test_local_page_loads",
+      "status": "passed",
+      "duration": 4.293390000064392,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_local_demo.py::TestLocalDemo::test_javascript_interaction",
+      "status": "passed",
+      "duration": 4.317515300062951,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_local_demo.py::TestLocalDemo::test_responsive_behavior",
+      "status": "passed",
+      "duration": 4.622558500035666,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_successful_login",
+      "status": "passed",
+      "duration": 8.795610700093675,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_login_with_invalid_credentials",
+      "status": "passed",
+      "duration": 4.654737400007434,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_login_with_locked_user",
+      "status": "passed",
+      "duration": 4.71852230001241,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_login_with_empty_fields[-secret_sauce]",
+      "status": "passed",
+      "duration": 4.670434599975124,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_login_with_empty_fields[standard_user-]",
+      "status": "passed",
+      "duration": 4.654560099996161,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_login.py::TestLogin::test_login_with_empty_fields[-]",
+      "status": "passed",
+      "duration": 5.600504399917554,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_shopping_cart.py::TestShoppingCart::test_add_single_item_to_cart",
+      "status": "failed",
+      "duration": 26.386231099953875,
+      "error_message": "tests\\sample_tests\\test_shopping_cart.py:37: in test_add_single_item_to_cart\n    assert new_count == initial_count + 1\nE   assert 0 == (0 + 1)",
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_shopping_cart.py::TestShoppingCart::test_add_multiple_items_to_cart",
+      "status": "passed",
+      "duration": 5.463340300018899,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    },
+    {
+      "browser": "chrome",
+      "test_name": "tests/sample_tests/test_shopping_cart.py::TestShoppingCart::test_inventory_page_displays_products",
+      "status": "passed",
+      "duration": 4.721026800049003,
+      "error_message": null,
+      "timestamp": "2025-07-18T01:26:14.389722"
+    }
+  ]
+}
