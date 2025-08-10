@@ -7,6 +7,7 @@ from typing import List, Dict, Any
 
 # Add this import
 from src.report_generator import ReportGenerator
+import defusedxml.ElementTree
 
 
 class TestRunner:
@@ -97,7 +98,6 @@ class TestRunner:
     def _run_test_file(self, test_file: str, browser: str) -> List[Dict[str, Any]]:
         """Run a specific test file with a specific browser"""
         import subprocess
-        import xml.etree.ElementTree as ET
         from pathlib import Path
         import tempfile
         import os
@@ -142,7 +142,7 @@ class TestRunner:
         # Parse results
         try:
             if os.path.exists(result_file) and os.path.getsize(result_file) > 0:
-                tree = ET.parse(result_file)
+                tree = defusedxml.ElementTree.parse(result_file)
                 root = tree.getroot()
 
                 # Get test suite information
