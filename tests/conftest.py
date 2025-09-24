@@ -42,12 +42,7 @@ def browser(request):
     headless = request.config.getoption("--headless")
 
     # Initialize browser manager
-    manager = BrowserManager()
-
-    # Override headless setting if specified
-    if headless:
-        browser_config = manager.config['browsers'][browser_name]
-        browser_config['headless'] = True
+    manager = BrowserManager(headless_override=headless)
 
     # Create browser instance
     driver = manager.get_browser(browser_name)

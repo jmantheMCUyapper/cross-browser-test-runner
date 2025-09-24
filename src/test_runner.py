@@ -27,7 +27,8 @@ class TestRunner:
         import pytest
 
         self.start_time = time.time()
-        browser_manager = BrowserManager()
+        headless_mode = bool(self.config.get("headless", False))
+        browser_manager = BrowserManager(headless_override=headless_mode)
         browser_versions = {}
 
         # Get available browsers

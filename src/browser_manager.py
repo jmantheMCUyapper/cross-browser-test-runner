@@ -26,7 +26,7 @@ class BrowserNotFoundError(Exception):
 class BrowserManager:
     """Manages browser driver creation and configuration"""
 
-    def __init__(self, config_path: str = None):
+    def __init__(self, config_path: str = None, headless_override: Optional[bool] = None):
         """Initialize browser manager with configuration"""
         if config_path is None:
             # Find config file relative to project root
@@ -35,6 +35,9 @@ class BrowserManager:
             config_path = project_root / "config" / "browsers.yaml"
 
         self.config = self._load_config(str(config_path))
+        if headless_override is not None:
+            for browser_config in self.config['browsers'].values():
+                browser_config['headless'] = headless_override
         self.supported_browsers = {
             'chrome': self._create_chrome,
             'firefox': self._create_firefox,
