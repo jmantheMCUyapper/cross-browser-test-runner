@@ -49,6 +49,8 @@ class TestRunner:
                 browser_versions[browser] = "Unknown"
 
         # Run tests for each browser
+        headless_mode = bool(self.config.get("headless", False))
+    
         for browser in self.config.get("browsers", ["chrome"]):
             if browser not in available_browser_list:
                 print(f"\nSkipping {browser} - not available")
@@ -71,7 +73,7 @@ class TestRunner:
             test_files = self.config.get("test_files", ["tests/"])
             for test_file in test_files:
                 if Path(test_file).exists():
-                    result = self._run_test_file(test_file, browser)
+                    result = self._run_test_file(test_file, browser, headless=headless_mode)
                     self.results.extend(result)
                 else:
                     print(f"Warning: Test file not found: {test_file}")
@@ -94,7 +96,8 @@ class TestRunner:
 
         return final_results
 
-    def _run_test_file(self, test_file: str, browser: str) -> List[Dict[str, Any]]:
+    def _run_test_file(self, test_file: str, browser: str, headless: bool = False,
+    ) -> List[Dict[str, Any]]:
         """Run a specific test file with a specific browser"""
         import subprocess
         import xml.etree.ElementTree as ET
@@ -116,6 +119,8 @@ class TestRunner:
             "--tb=short"  # Shorter traceback format
         ]
 
+        if headless:
+            cmd.append("--headless")
         results = []
         try:
             # Run the tests
